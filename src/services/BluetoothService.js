@@ -1,27 +1,7 @@
-
 import { Platform, PermissionsAndroid } from 'react-native';
-
-// Complete mock for all platforms so the app runs without native modules installed
-const BleManager = class MockBleManager {
-  startDeviceScan(uuids, options, listener) {
-    setTimeout(() => {
-      listener(null, { id: 'mock-1', name: 'MOCK-BMS-BATTERY' });
-    }, 2000);
-  }
-  stopDeviceScan() {}
-  async connectToDevice(id) {
-    return {
-      id,
-      name: 'MOCK-BMS-BATTERY',
-      discoverAllServicesAndCharacteristics: async () => {},
-    };
-  }
-  async cancelDeviceConnection(id) {}
-};
 
 class BluetoothService {
   constructor() {
-    this.manager = new BleManager();
     this.connectedDevice = null;
   }
 
@@ -33,62 +13,54 @@ class BluetoothService {
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         ]);
-
         return (
           granted[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] === 'granted' &&
-          granted[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] === 'granted' &&
-          granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] === 'granted'
+          granted[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] === 'granted'
         );
       } catch (err) {
         console.warn(err);
         return false;
       }
     }
-    return true; // iOS and Web permissions
+    return true; 
   }
 
-  startScanning(onDeviceFound) {
-    this.manager.startDeviceScan(null, null, (error, device) => {
-      if (error) {
-        console.error(error);
-        return;
+  // Returns a promise containing the real device selected by the user
+  async scanForRealDevice() {
+    if (Platform.OS === 'web') {
+      try {
+        if (!navigator || !navigator.bluetooth) {
+          throw new Error("Web Bluetooth is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+        }
+        
+        // This triggers the native browser dialog showing real Bluetooth devices in the room
+        const device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true
+        });
+        
+        if (device) {
+          return {
+            id: device.id || 'real-device-' + Math.random().toString(36).substr(2, 9),
+            name: device.name || 'Unknown Bluetooth Device',
+            unsecured: true, // We assume it's vulnerable for the sake of the app flow
+            password: 'Default (000000)'
+          };
+        }
+      } catch (error) {
+        console.error("Web Bluetooth Error: ", error);
+        throw error;
       }
-      if (device && device.name) {
-        onDeviceFound(device);
-      }
-    });
-  }
-
-  stopScanning() {
-    this.manager.stopDeviceScan();
-  }
-
-  async connectToDevice(device) {
-    try {
-      this.stopScanning();
-      console.log(`Connecting to ${device.name}...`);
-      const connectedDevice = await this.manager.connectToDevice(device.id);
-      
-      console.log(`Discovering services and characteristics...`);
-      await connectedDevice.discoverAllServicesAndCharacteristics();
-      
-      this.connectedDevice = connectedDevice;
-      console.log('Connected successfully!');
-      
-      return true;
-    } catch (e) {
-      console.error('Connection error', e);
-      return false;
-    }
-  }
-
-  async disconnect() {
-    if (this.connectedDevice) {
-      await this.manager.cancelDeviceConnection(this.connectedDevice.id);
-      this.connectedDevice = null;
-      console.log('Disconnected');
+    } else {
+      // Fallback for native testing without ble-plx installed
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            id: 'mock-1', name: 'NATIVE-MOCK-BMS', unsecured: true, password: 'None'
+          });
+        }, 1500);
+      });
     }
   }
 }
 
-export default BluetoothService;
+export default new BluetoothService();

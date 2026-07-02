@@ -23,14 +23,21 @@ export default function ScannerScreen() {
     setFoundDevices([]);
     setIsScanning(true);
     
-    setTimeout(() => {
-      setFoundDevices([
-        { id: 'mock-1', name: 'BAT-BMS-RICKSHAW-01', unsecured: true, password: 'None' },
-        { id: 'mock-2', name: 'JBD-BMS-99X', unsecured: true, password: 'Default (123456)' },
-        { id: 'mock-3', name: 'DALY-SECURE', unsecured: false, password: 'Secure' }
-      ]);
+    try {
+      // Call the physical Web Bluetooth antenna
+      const realDevice = await BluetoothService.scanForRealDevice();
+      if (realDevice) {
+        setFoundDevices([realDevice]);
+      }
+    } catch (error) {
+      if (error.name === 'NotFoundError') {
+        alert("You cancelled the scan or no devices were found nearby.");
+      } else {
+        alert(error.message || "Failed to access Bluetooth hardware.");
+      }
+    } finally {
       setIsScanning(false);
-    }, 3000);
+    }
   };
 
   const openFixModal = (device) => {
