@@ -7,6 +7,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRickshaw } from '../../context/RickshawContext';
 
+import { getDeviceTypeInfo } from '../../utils/DeviceClassifier';
+
 export default function ScannerScreen() {
   const { t } = useLanguage();
   const { theme, isDarkMode } = useTheme();
@@ -112,21 +114,24 @@ export default function ScannerScreen() {
               <FlatList
                 data={foundDevices}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={[styles.deviceCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                    <View style={styles.deviceInfo}>
-                      <MaterialCommunityIcons 
-                        name={item.unsecured ? "alert-circle" : "check-circle"} 
-                        size={24} 
-                        color={item.unsecured ? theme.danger : theme.success} 
-                      />
-                      <View style={styles.deviceTextContainer}>
-                        <Text style={[styles.deviceName, { color: theme.textPrimary }]}>{item.name}</Text>
-                        <Text style={[item.unsecured ? styles.deviceVuln : styles.deviceSecure, { color: item.unsecured ? theme.danger : theme.success }]}>
-                          {item.unsecured ? `${t('auditVulnPrefix')}${item.password}` : `${t('auditSecurePrefix')}Secure`}
-                        </Text>
+                renderItem={({ item }) => {
+                  const deviceInfo = getDeviceTypeInfo(item.name);
+                  return (
+                    <View style={[styles.deviceCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                      <View style={styles.deviceInfo}>
+                        <MaterialCommunityIcons 
+                          name={deviceInfo.icon} 
+                          size={32} 
+                          color={item.unsecured ? theme.danger : theme.success} 
+                        />
+                        <View style={styles.deviceTextContainer}>
+                          <Text style={[styles.deviceName, { color: theme.textPrimary }]}>{item.name}</Text>
+                          <Text style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 2 }}>{deviceInfo.type}</Text>
+                          <Text style={[item.unsecured ? styles.deviceVuln : styles.deviceSecure, { color: item.unsecured ? theme.danger : theme.success }]}>
+                            {item.unsecured ? `${t('auditVulnPrefix')}${item.password}` : `${t('auditSecurePrefix')}Secure`}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
                     
                     {item.unsecured && (
                       <TouchableOpacity 

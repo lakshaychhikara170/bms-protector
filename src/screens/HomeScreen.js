@@ -6,6 +6,7 @@ import StorageService from '../services/StorageService';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useRickshaw } from '../context/RickshawContext';
+import { getDeviceTypeInfo } from '../utils/DeviceClassifier';
 
 export default function HomeScreen() {
   const { t } = useLanguage();
@@ -14,10 +15,12 @@ export default function HomeScreen() {
   const [isShieldActive, setIsShieldActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   
+  const deviceInfo = myRickshaw ? getDeviceTypeInfo(myRickshaw.name) : null;
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Automatically activate the shield if a rickshaw is saved
+    // Automatically activate the shield if a device is saved
     if (myRickshaw) {
       toggleShield(true);
     }
@@ -66,16 +69,16 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
-          <MaterialCommunityIcons name="shield-car" size={32} color={theme.primary} />
+          <MaterialCommunityIcons name="shield-lock" size={32} color={theme.primary} />
           <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('shieldHeader')}</Text>
         </View>
 
         {myRickshaw ? (
           <>
             <View style={[styles.profileBadge, { backgroundColor: theme.card, borderColor: theme.primary }]}>
-              <MaterialCommunityIcons name="car-electric" size={20} color={theme.primary} />
+              <MaterialCommunityIcons name={deviceInfo.icon} size={20} color={theme.primary} />
               <Text style={[styles.profileText, { color: theme.textPrimary }]}>
-                Connected to: <Text style={{ fontWeight: 'bold', color: theme.primary }}>{myRickshaw.name}</Text>
+                {deviceInfo.type}: <Text style={{ fontWeight: 'bold', color: theme.primary }}>{myRickshaw.name}</Text>
               </Text>
             </View>
 
@@ -140,9 +143,9 @@ export default function HomeScreen() {
         ) : (
           <View style={styles.emptyContainer}>
             <MaterialCommunityIcons name="bluetooth-off" size={80} color={theme.textSecondary} style={{ marginBottom: 20 }} />
-            <Text style={[styles.statusText, { color: theme.textPrimary, textAlign: 'center' }]}>No Rickshaw Connected</Text>
+            <Text style={[styles.statusText, { color: theme.textPrimary, textAlign: 'center' }]}>No Device Connected</Text>
             <Text style={[styles.statusDescription, { color: theme.textSecondary, marginBottom: 40 }]}>
-              You are not currently connected to any rickshaw battery. Please go to the Audit tab to scan and secure a battery first.
+              You are not currently connected to any device. Please go to the Audit tab to scan and secure a device first.
             </Text>
           </View>
         )}
