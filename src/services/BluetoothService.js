@@ -41,7 +41,7 @@ class BluetoothService {
         if (device) {
           return {
             id: device.id || 'real-device-' + Math.random().toString(36).substr(2, 9),
-            name: device.name || 'Unknown Bluetooth Device',
+            name: device.name || `Raw BLE Signal (${device.id ? device.id.substring(0, 8) : 'Unknown'})`,
             unsecured: true, // We assume it's vulnerable for the sake of the app flow
             password: 'Default (000000)'
           };

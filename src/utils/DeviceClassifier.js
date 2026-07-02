@@ -21,6 +21,10 @@ export const getDeviceTypeInfo = (deviceName = '') => {
     return { type: 'Rickshaw Battery', icon: 'car-electric' };
   }
 
+  if (name.includes('raw ble signal') || name.includes('unknown')) {
+    return { type: 'Raw Signal', icon: 'access-point-network' };
+  }
+
   // Default generic bluetooth device
   return { type: 'Bluetooth Device', icon: 'bluetooth' };
 };
