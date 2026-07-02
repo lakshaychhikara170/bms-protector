@@ -37,7 +37,7 @@ jobs:
       - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --console=plain --info -Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"
 
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v2
