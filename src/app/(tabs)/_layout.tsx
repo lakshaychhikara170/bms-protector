@@ -1,12 +1,36 @@
+import React, { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { TouchableOpacity, Text, View, Platform } from 'react-native';
 
 export default function TabLayout() {
   const { t, lang, setLang } = useLanguage();
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        setDeferredPrompt(e);
+      });
+    }
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   const toggleLanguage = () => {
     setLang(lang === 'en' ? 'hi' : 'en');
@@ -19,6 +43,22 @@ export default function TabLayout() {
         position: 'absolute', top: 40, right: 20, zIndex: 100, 
         flexDirection: 'row', alignItems: 'center'
       }}>
+        {/* PWA Download Button (Only shows if installable) */}
+        {deferredPrompt && (
+          <TouchableOpacity 
+            onPress={handleInstallClick} 
+            style={{ 
+              backgroundColor: theme.success, borderRadius: 20, elevation: 5, paddingHorizontal: 12, paddingVertical: 6,
+              marginRight: 10, flexDirection: 'row', alignItems: 'center'
+            }}
+          >
+            <MaterialCommunityIcons name="download" size={18} color="#FFF" />
+            <Text style={{ marginLeft: 6, fontWeight: 'bold', color: '#FFF', fontSize: 13 }}>
+              App
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Theme Toggle */}
         <TouchableOpacity 
           onPress={toggleTheme} 
