@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLanguage } from '../../context/LanguageContext';
@@ -8,6 +8,29 @@ import { TouchableOpacity, Text, View, Platform, Linking } from 'react-native';
 export default function TabLayout() {
   const { t, lang, setLang } = useLanguage();
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        setDeferredPrompt(e);
+      });
+    }
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   const handleDownloadAPK = () => {
     // This links directly to the GitHub repository where the APK will be hosted
@@ -23,13 +46,29 @@ export default function TabLayout() {
       {/* Global Header Toggles */}
       <View style={{ 
         position: 'absolute', top: 40, right: 20, zIndex: 100, 
-        flexDirection: 'row', alignItems: 'center'
+        flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end'
       }}>
+        {/* PWA Download Button (Only shows if installable) */}
+        {deferredPrompt && (
+          <TouchableOpacity 
+            onPress={handleInstallClick} 
+            style={{ 
+              backgroundColor: theme.success, borderRadius: 20, elevation: 5, paddingHorizontal: 12, paddingVertical: 6,
+              marginRight: 10, flexDirection: 'row', alignItems: 'center'
+            }}
+          >
+            <MaterialCommunityIcons name="download" size={18} color="#FFF" />
+            <Text style={{ marginLeft: 6, fontWeight: 'bold', color: '#FFF', fontSize: 13 }}>
+              Install PWA
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Permanent APK Download Button */}
         <TouchableOpacity 
           onPress={handleDownloadAPK} 
           style={{ 
-            backgroundColor: theme.success, borderRadius: 20, elevation: 5, paddingHorizontal: 12, paddingVertical: 6,
+            backgroundColor: theme.primary, borderRadius: 20, elevation: 5, paddingHorizontal: 12, paddingVertical: 6,
             marginRight: 10, flexDirection: 'row', alignItems: 'center'
           }}
         >

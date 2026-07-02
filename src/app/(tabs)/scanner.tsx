@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView, Platform, StatusBar, TextInput, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView, Platform, StatusBar, TextInput, Modal, RefreshControl, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import BluetoothService from '../../services/BluetoothService';
 import StorageService from '../../services/StorageService';
@@ -15,11 +15,23 @@ export default function ScannerScreen() {
   const { setMyRickshaw } = useRickshaw();
   const [isScanning, setIsScanning] = useState(false);
   const [foundDevices, setFoundDevices] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [newName, setNewName] = useState('');
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    if (Platform.OS === 'web') {
+      window.location.reload();
+    } else {
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 1000);
+    }
+  };
 
   const startAudit = async () => {
     setFoundDevices([]);
@@ -106,14 +118,22 @@ export default function ScannerScreen() {
 
           <View style={styles.listContainer}>
             {foundDevices.length === 0 && !isScanning ? (
-              <View style={styles.emptyState}>
+              <ScrollView 
+                contentContainerStyle={styles.emptyState}
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />
+                }
+              >
                 <MaterialCommunityIcons name="shield-search" size={48} color={theme.textSecondary} />
                 <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>{t('auditEmpty')}</Text>
-              </View>
+              </ScrollView>
             ) : (
               <FlatList
                 data={foundDevices}
                 keyExtractor={(item) => item.id}
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />
+                }
                 renderItem={({ item }) => {
                   const deviceInfo = getDeviceTypeInfo(item.name);
                   return (
