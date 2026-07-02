@@ -50,6 +50,18 @@ class StorageService {
     try {
       const jsonValue = JSON.stringify(profile);
       await AsyncStorage.setItem(RICKSHAW_KEY, jsonValue);
+
+      // Add to history
+      const historyStr = await AsyncStorage.getItem('@bms_history');
+      let history = historyStr ? JSON.parse(historyStr) : [];
+      // Remove if it already exists to put it at the top
+      history = history.filter(p => p.id !== profile.id);
+      history.unshift(profile);
+      
+      // Keep only last 10 devices
+      if (history.length > 10) history = history.slice(0, 10);
+      await AsyncStorage.setItem('@bms_history', JSON.stringify(history));
+
       return true;
     } catch (e) {
       console.error('Failed to save rickshaw profile', e);
@@ -64,6 +76,16 @@ class StorageService {
     } catch (e) {
       console.error('Failed to fetch rickshaw profile', e);
       return null;
+    }
+  }
+
+  static async getHistory() {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@bms_history');
+      return jsonValue != null ? JSON.parse(jsonValue) : [];
+    } catch (e) {
+      console.error('Failed to fetch history', e);
+      return [];
     }
   }
 

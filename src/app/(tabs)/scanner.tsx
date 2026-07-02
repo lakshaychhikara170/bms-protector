@@ -15,6 +15,7 @@ export default function ScannerScreen() {
   const { setMyRickshaw } = useRickshaw();
   const [isScanning, setIsScanning] = useState(false);
   const [foundDevices, setFoundDevices] = useState([]);
+  const [history, setHistory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -22,12 +23,22 @@ export default function ScannerScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [newName, setNewName] = useState('');
 
+  React.useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    const h = await StorageService.getHistory();
+    setHistory(h);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     if (Platform.OS === 'web') {
       window.location.reload();
     } else {
       setTimeout(() => {
+        loadHistory();
         setRefreshing(false);
       }, 1000);
     }
@@ -75,6 +86,8 @@ export default function ScannerScreen() {
       name: updatedName,
       secured: true
     });
+    
+    loadHistory();
 
     setFoundDevices(prevDevices => 
       prevDevices.map(dev => {
@@ -86,6 +99,15 @@ export default function ScannerScreen() {
     );
     
     setIsModalVisible(false);
+  };
+
+  const connectToHistoryDevice = async (device) => {
+    await setMyRickshaw({
+      id: device.id,
+      name: device.name,
+      secured: true
+    });
+    alert(`Connected to ${device.name}`);
   };
 
   return (
@@ -119,13 +141,47 @@ export default function ScannerScreen() {
           <View style={styles.listContainer}>
             {foundDevices.length === 0 && !isScanning ? (
               <ScrollView 
-                contentContainerStyle={styles.emptyState}
+                contentContainerStyle={history.length === 0 ? styles.emptyState : {}}
                 refreshControl={
                   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />
                 }
               >
-                <MaterialCommunityIcons name="shield-search" size={48} color={theme.textSecondary} />
-                <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>{t('auditEmpty')}</Text>
+                {history.length > 0 ? (
+                  <View style={styles.historySection}>
+                    <Text style={[styles.historyTitle, { color: theme.textSecondary }]}>PREVIOUSLY CONNECTED</Text>
+                    {history.map((item, index) => {
+                      const deviceInfo = getDeviceTypeInfo(item.name);
+                      return (
+                        <TouchableOpacity 
+                          key={index} 
+                          style={[styles.deviceCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+                          onPress={() => connectToHistoryDevice(item)}
+                        >
+                          <View style={styles.deviceInfo}>
+                            <MaterialCommunityIcons 
+                              name={deviceInfo.icon} 
+                              size={32} 
+                              color={theme.success} 
+                            />
+                            <View style={styles.deviceTextContainer}>
+                              <Text style={[styles.deviceName, { color: theme.textPrimary }]}>{item.name}</Text>
+                              <Text style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 2 }}>{deviceInfo.type}</Text>
+                              <Text style={[styles.deviceSecure, { color: theme.success }]}>
+                                {t('auditSecurePrefix')}Saved Device
+                              </Text>
+                            </View>
+                          </View>
+                          <MaterialCommunityIcons name="chevron-right" size={24} color={theme.textSecondary} />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <>
+                    <MaterialCommunityIcons name="shield-search" size={48} color={theme.textSecondary} />
+                    <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>{t('auditEmpty')}</Text>
+                  </>
+                )}
               </ScrollView>
             ) : (
               <FlatList
@@ -248,5 +304,14 @@ const styles = StyleSheet.create({
   cancelButton: { paddingHorizontal: 16, paddingVertical: 10, marginRight: 12 },
   cancelButtonText: { fontSize: 15, fontWeight: '600' },
   saveButton: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 6 },
-  saveButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' }
+  saveButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  historySection: {
+    paddingTop: 10,
+  },
+  historyTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 12,
+  }
 });
