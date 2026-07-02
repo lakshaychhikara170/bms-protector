@@ -70,72 +70,82 @@ export default function HomeScreen() {
           <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('shieldHeader')}</Text>
         </View>
 
-        {myRickshaw && (
-          <View style={[styles.profileBadge, { backgroundColor: theme.card, borderColor: theme.primary }]}>
-            <MaterialCommunityIcons name="car-electric" size={20} color={theme.primary} />
-            <Text style={[styles.profileText, { color: theme.textPrimary }]}>
-              Connected to: <Text style={{ fontWeight: 'bold', color: theme.primary }}>{myRickshaw.name}</Text>
+        {myRickshaw ? (
+          <>
+            <View style={[styles.profileBadge, { backgroundColor: theme.card, borderColor: theme.primary }]}>
+              <MaterialCommunityIcons name="car-electric" size={20} color={theme.primary} />
+              <Text style={[styles.profileText, { color: theme.textPrimary }]}>
+                Connected to: <Text style={{ fontWeight: 'bold', color: theme.primary }}>{myRickshaw.name}</Text>
+              </Text>
+            </View>
+
+            <View style={styles.statusContainer}>
+              <View style={[
+                styles.statusCard, 
+                { backgroundColor: theme.card, borderColor: isShieldActive ? theme.success : theme.danger }
+              ]}>
+                
+                <View style={styles.statusIconContainer}>
+                  <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                    <FontAwesome5 
+                      name="shield-alt" 
+                      size={80} 
+                      color={isShieldActive ? theme.success : theme.danger} 
+                      style={!isShieldActive && { opacity: 0.5 }}
+                    />
+                  </Animated.View>
+
+                  {!isShieldActive && (
+                    <MaterialCommunityIcons 
+                      name="close-circle" 
+                      size={40} 
+                      color={theme.danger} 
+                      style={[styles.crossIcon, { backgroundColor: theme.card }]} 
+                    />
+                  )}
+                </View>
+
+                <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>{t('shieldStatus')}</Text>
+                <Text style={[styles.statusText, { color: isShieldActive ? theme.success : theme.danger }]}>
+                  {isShieldActive ? t('shieldActive') : t('shieldInactive')}
+                </Text>
+                <Text style={[styles.statusDescription, { color: theme.textSecondary }]}>
+                  {isShieldActive 
+                    ? t('shieldActiveDesc')
+                    : t('shieldInactiveDesc')
+                  }
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.actionContainer}>
+              <TouchableOpacity 
+                style={[
+                  styles.actionButton, 
+                  { backgroundColor: isShieldActive ? theme.card : theme.primary, borderColor: isShieldActive ? theme.border : theme.primary, borderWidth: isShieldActive ? 2 : 0 }
+                ]}
+                onPress={() => toggleShield(false)}
+                disabled={isConnecting}
+              >
+                {isConnecting ? (
+                  <ActivityIndicator color={theme.textPrimary} size="large" />
+                ) : (
+                  <Text style={[styles.buttonText, { color: isShieldActive ? theme.textPrimary : '#FFFFFF' }]}>
+                    {isShieldActive ? t('shieldBtnDeactivate') : t('shieldBtnActivate')}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons name="bluetooth-off" size={80} color={theme.textSecondary} style={{ marginBottom: 20 }} />
+            <Text style={[styles.statusText, { color: theme.textPrimary, textAlign: 'center' }]}>No Rickshaw Connected</Text>
+            <Text style={[styles.statusDescription, { color: theme.textSecondary, marginBottom: 40 }]}>
+              You are not currently connected to any rickshaw battery. Please go to the Audit tab to scan and secure a battery first.
             </Text>
           </View>
         )}
-
-        <View style={styles.statusContainer}>
-          <View style={[
-            styles.statusCard, 
-            { backgroundColor: theme.card, borderColor: isShieldActive ? theme.success : theme.danger }
-          ]}>
-            
-            <View style={styles.statusIconContainer}>
-              <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                <FontAwesome5 
-                  name="shield-alt" 
-                  size={80} 
-                  color={isShieldActive ? theme.success : theme.danger} 
-                  style={!isShieldActive && { opacity: 0.5 }}
-                />
-              </Animated.View>
-
-              {!isShieldActive && (
-                <MaterialCommunityIcons 
-                  name="close-circle" 
-                  size={40} 
-                  color={theme.danger} 
-                  style={[styles.crossIcon, { backgroundColor: theme.card }]} 
-                />
-              )}
-            </View>
-
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>{t('shieldStatus')}</Text>
-            <Text style={[styles.statusText, { color: isShieldActive ? theme.success : theme.danger }]}>
-              {isShieldActive ? t('shieldActive') : t('shieldInactive')}
-            </Text>
-            <Text style={[styles.statusDescription, { color: theme.textSecondary }]}>
-              {isShieldActive 
-                ? t('shieldActiveDesc')
-                : t('shieldInactiveDesc')
-              }
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.actionContainer}>
-          <TouchableOpacity 
-            style={[
-              styles.actionButton, 
-              { backgroundColor: isShieldActive ? theme.card : theme.primary, borderColor: isShieldActive ? theme.border : theme.primary, borderWidth: isShieldActive ? 2 : 0 }
-            ]}
-            onPress={() => toggleShield(false)}
-            disabled={isConnecting}
-          >
-            {isConnecting ? (
-              <ActivityIndicator color={theme.textPrimary} size="large" />
-            ) : (
-              <Text style={[styles.buttonText, { color: isShieldActive ? theme.textPrimary : '#FFFFFF' }]}>
-                {isShieldActive ? t('shieldBtnDeactivate') : t('shieldBtnActivate')}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -148,6 +158,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
   },
   header: {
     flexDirection: 'row',
