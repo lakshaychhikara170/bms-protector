@@ -20,6 +20,7 @@ export default function ScannerScreen() {
   const [refreshing, setRefreshing] = useState(false);
   
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDevModalVisible, setIsDevModalVisible] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [newName, setNewName] = useState('');
@@ -114,9 +115,13 @@ export default function ScannerScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
-          <MaterialCommunityIcons name="radar" size={28} color={theme.danger} />
-          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('auditHeader')}</Text>
+        <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border, justifyContent: 'space-between' }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => setIsDevModalVisible(true)} activeOpacity={0.8}>
+              <MaterialCommunityIcons name="radar" size={28} color={theme.danger} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('auditHeader')}</Text>
+          </View>
         </View>
 
         <View style={styles.content}>
@@ -184,32 +189,6 @@ export default function ScannerScreen() {
                   </>
                 )}
                 
-                {/* Hidden Developer Tools */}
-                <View style={{ marginTop: 60, marginBottom: 20, opacity: 0.2, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 10, marginBottom: 12, color: theme.textSecondary, letterSpacing: 1 }}>DEVELOPER TESTING</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <TouchableOpacity 
-                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
-                      onPress={() => connectToHistoryDevice({ id: 'test-audio', name: 'JBL Headphones' })}>
-                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test Audio</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
-                      onPress={() => connectToHistoryDevice({ id: 'test-watch', name: 'Garmin Watch' })}>
-                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test Watch</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
-                      onPress={() => connectToHistoryDevice({ id: 'test-tv', name: 'LG Smart TV' })}>
-                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test TV</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
-                      onPress={() => connectToHistoryDevice({ id: 'test-bms', name: 'Daly BMS 48V' })}>
-                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test BMS</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
               </ScrollView>
             ) : (
               <FlatList
@@ -297,6 +276,53 @@ export default function ScannerScreen() {
           </View>
         </View>
       </Modal>
+      <Modal visible={isDevModalVisible} transparent={true} animationType="fade" onRequestClose={() => setIsDevModalVisible(false)}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={styles.modalHeader}>
+              <MaterialCommunityIcons name="xml" size={24} color={theme.textSecondary} />
+              <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>Developer Tools</Text>
+            </View>
+            
+            <Text style={[styles.modalDesc, { color: theme.textSecondary, marginBottom: 24 }]}>
+              Instantly connect to mock devices to test dynamic UI layouts.
+            </Text>
+            
+            <View style={{ gap: 12 }}>
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, alignItems: 'center' }]} 
+                onPress={() => { setIsDevModalVisible(false); connectToHistoryDevice({ id: 'test-audio', name: 'JBL Headphones' }); }}>
+                <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: '600' }}>Test Audio Controls</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, alignItems: 'center' }]} 
+                onPress={() => { setIsDevModalVisible(false); connectToHistoryDevice({ id: 'test-watch', name: 'Garmin Watch' }); }}>
+                <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: '600' }}>Test Watch Controls</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, alignItems: 'center' }]} 
+                onPress={() => { setIsDevModalVisible(false); connectToHistoryDevice({ id: 'test-tv', name: 'LG Smart TV' }); }}>
+                <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: '600' }}>Test TV Controls</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, alignItems: 'center' }]} 
+                onPress={() => { setIsDevModalVisible(false); connectToHistoryDevice({ id: 'test-bms', name: 'Daly BMS 48V' }); }}>
+                <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: '600' }}>Test Rickshaw Controls</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.modalActions, { marginTop: 24 }]}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setIsDevModalVisible(false)}>
+                <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
