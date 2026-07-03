@@ -155,7 +155,15 @@ export default function ScannerScreen() {
               >
                 {history.length > 0 ? (
                   <View style={styles.historySection}>
-                    <Text style={[styles.historyTitle, { color: theme.textSecondary }]}>PREVIOUSLY CONNECTED</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <Text style={[styles.historyTitle, { color: theme.textSecondary, marginBottom: 0 }]}>PREVIOUSLY CONNECTED</Text>
+                      <TouchableOpacity onPress={async () => {
+                        await StorageService.clearHistory();
+                        setHistory([]);
+                      }}>
+                        <Text style={{ color: theme.danger, fontSize: 12, fontWeight: '600' }}>Clear All</Text>
+                      </TouchableOpacity>
+                    </View>
                     {history.map((item, index) => {
                       const deviceInfo = getDeviceTypeInfo(item.name);
                       return (

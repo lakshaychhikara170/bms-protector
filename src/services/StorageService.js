@@ -89,6 +89,16 @@ class StorageService {
     }
   }
 
+  static async clearHistory() {
+    try {
+      await AsyncStorage.removeItem('@bms_history');
+      return true;
+    } catch (e) {
+      console.error('Failed to clear history', e);
+      return false;
+    }
+  }
+
   static async clearAll() {
     try {
       await AsyncStorage.clear();
