@@ -313,6 +313,12 @@ export default function ScannerScreen() {
                 onPress={() => { setIsDevModalVisible(false); connectToHistoryDevice({ id: 'test-bms', name: 'Daly BMS 48V' }); }}>
                 <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: '600' }}>Test Rickshaw Controls</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: theme.danger, alignItems: 'center', marginTop: 12 }]} 
+                onPress={() => { setIsDevModalVisible(false); setMyRickshaw(null); }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600' }}>Disconnect Current Device</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.modalActions, { marginTop: 24 }]}>
