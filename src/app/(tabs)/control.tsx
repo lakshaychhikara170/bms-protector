@@ -5,6 +5,286 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRickshaw } from '../../context/RickshawContext';
+import { getDeviceTypeInfo } from '../../utils/DeviceClassifier';
+
+const DeviceSpecificControls = ({ deviceInfo, theme, t, showInfo, isDischarging, setIsDischarging, isCharging, setIsCharging }) => {
+  const type = deviceInfo?.type || 'Rickshaw Battery';
+
+  if (type === 'Audio Device') {
+    return (
+      <>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Left Bud</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>85 %</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Right Bud</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>80 %</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Case Battery</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>42 %</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Firmware</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>v2.1</Text>
+          </View>
+        </View>
+
+        <View style={styles.controlsSection}>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Audio Controls</Text>
+          
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isDischarging ? "noise-abatement" : "ear-hearing"} size={32} color={isDischarging ? theme.success : theme.textSecondary} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Noise Cancellation</Text>
+                  <TouchableOpacity onPress={() => showInfo("Noise Cancellation", "Blocks out external ambient noise.")}>
+                    <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isDischarging ? 'Active' : 'Disabled'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDischarging ? theme.danger : theme.success }]} onPress={() => setIsDischarging(!isDischarging)}>
+              <Text style={styles.actionButtonText}>{isDischarging ? 'Disable' : 'Enable'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isCharging ? "surround-sound" : "speaker-off"} size={32} color={isCharging ? theme.primary : theme.textSecondary} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Spatial Audio</Text>
+                  <TouchableOpacity onPress={() => showInfo("Spatial Audio", "Creates a 3D immersive sound experience.")}>
+                    <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isCharging ? '3D Audio On' : 'Standard Stereo'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isCharging ? theme.warning : theme.primary }]} onPress={() => setIsCharging(!isCharging)}>
+              <Text style={styles.actionButtonText}>{isCharging ? 'Disable' : 'Enable'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </>
+    );
+  }
+
+  if (type === 'Wearable / Watch') {
+    return (
+      <>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Battery</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>62 %</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Heart Rate</Text>
+            <Text style={[styles.statValue, { color: theme.danger }]}>72 bpm</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Steps</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>4,120</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Sync</Text>
+            <Text style={[styles.statValue, { color: theme.success }]}>Just now</Text>
+          </View>
+        </View>
+
+        <View style={styles.controlsSection}>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Watch Settings</Text>
+          
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isDischarging ? "watch-variant" : "watch"} size={32} color={isDischarging ? theme.success : theme.textSecondary} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Always-On Display</Text>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isDischarging ? 'Screen always visible' : 'Raise to wake'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDischarging ? theme.danger : theme.success }]} onPress={() => setIsDischarging(!isDischarging)}>
+              <Text style={styles.actionButtonText}>{isDischarging ? 'Disable' : 'Enable'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isCharging ? "heart-pulse" : "heart-outline"} size={32} color={isCharging ? theme.primary : theme.textSecondary} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Continuous HR</Text>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isCharging ? 'Monitoring 24/7' : 'Manual only'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isCharging ? theme.warning : theme.primary }]} onPress={() => setIsCharging(!isCharging)}>
+              <Text style={styles.actionButtonText}>{isCharging ? 'Disable' : 'Enable'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </>
+    );
+  }
+
+  if (type === 'Smart TV' || type === 'Computer / Phone') {
+    return (
+      <>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Network</Text>
+            <Text style={[styles.statValue, { color: theme.success }]}>Online</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Storage</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>45 GB</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Temperature</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>48 °C</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Screen</Text>
+            <Text style={[styles.statValue, { color: theme.textPrimary }]}>{isDischarging ? 'ON' : 'OFF'}</Text>
+          </View>
+        </View>
+
+        <View style={styles.controlsSection}>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Device Controls</Text>
+          
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isDischarging ? "television" : "television-off"} size={32} color={isDischarging ? theme.success : theme.danger} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Power State</Text>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isDischarging ? 'Screen is Active' : 'Screen is Asleep'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDischarging ? theme.danger : theme.success }]} onPress={() => setIsDischarging(!isDischarging)}>
+              <Text style={styles.actionButtonText}>{isDischarging ? 'Sleep' : 'Wake'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.controlInfo}>
+              <MaterialCommunityIcons name={isCharging ? "lock" : "lock-open"} size={32} color={isCharging ? theme.primary : theme.textSecondary} />
+              <View style={styles.controlText}>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>Remote Lock</Text>
+                </View>
+                <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>{isCharging ? 'Locked' : 'Unlocked'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={[styles.actionButton, { backgroundColor: isCharging ? theme.warning : theme.primary }]} onPress={() => setIsCharging(!isCharging)}>
+              <Text style={styles.actionButtonText}>{isCharging ? 'Unlock' : 'Lock'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </>
+    );
+  }
+
+  // Fallback to Rickshaw Battery / Raw Signal controls
+  return (
+    <>
+      <View style={styles.statsContainer}>
+        <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlVoltage')}</Text>
+          <Text style={[styles.statValue, { color: theme.textPrimary }]}>52.4 V</Text>
+        </View>
+        <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlCurrent')}</Text>
+          <Text style={[styles.statValue, { color: theme.textPrimary }]}>12.1 A</Text>
+        </View>
+        <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlSOC')}</Text>
+          <Text style={[styles.statValue, { color: theme.textPrimary }]}>84 %</Text>
+        </View>
+        <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlTemp')}</Text>
+          <Text style={[styles.statValue, { color: theme.textPrimary }]}>32 °C</Text>
+        </View>
+      </View>
+
+      <View style={styles.controlsSection}>
+        <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{t('ctrlMainControls')}</Text>
+        
+        <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={styles.controlInfo}>
+            <MaterialCommunityIcons 
+              name={isDischarging ? "lightning-bolt" : "lightning-bolt-outline"} 
+              size={32} 
+              color={isDischarging ? theme.success : theme.danger} 
+            />
+            <View style={styles.controlText}>
+              <View style={styles.titleRow}>
+                <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>{t('ctrlDischargeTitle')}</Text>
+                <TouchableOpacity onPress={() => showInfo(
+                  t('ctrlDischargeTitle'), 
+                  "Controls the power going OUT to the rickshaw's motor. Disabling this acts as a secure anti-theft kill switch, completely cutting off the motor's power supply so the rickshaw cannot be driven."
+                )}>
+                  <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>
+                {isDischarging ? t('ctrlDischargeOn') : t('ctrlDischargeOff')}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: isDischarging ? theme.danger : theme.success }]}
+            onPress={() => setIsDischarging(!isDischarging)}
+          >
+            <Text style={styles.actionButtonText}>
+              {isDischarging ? t('ctrlBtnCut') : t('ctrlBtnRestore')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={styles.controlInfo}>
+            <MaterialCommunityIcons 
+              name={isCharging ? "power-plug" : "power-plug-off"} 
+              size={32} 
+              color={isCharging ? theme.primary : theme.textSecondary} 
+            />
+            <View style={styles.controlText}>
+              <View style={styles.titleRow}>
+                <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>{t('ctrlChargeTitle')}</Text>
+                <TouchableOpacity onPress={() => showInfo(
+                  t('ctrlChargeTitle'), 
+                  "Controls the power coming IN from a wall charger. Disable this to stop the battery from accepting electricity. Useful for preventing overcharging, extending battery lifespan, or for safety if a public charger seems faulty."
+                )}>
+                  <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>
+                {isCharging ? t('ctrlChargeOn') : t('ctrlChargeOff')}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: isCharging ? theme.warning : theme.primary }]}
+            onPress={() => setIsCharging(!isCharging)}
+          >
+            <Text style={styles.actionButtonText}>
+              {isCharging ? t('ctrlBtnDisable') : t('ctrlBtnEnable')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </>
+  );
+};
 
 export default function ControlScreen() {
   const { t } = useLanguage();
@@ -30,94 +310,16 @@ export default function ControlScreen() {
         </View>
 
         {myRickshaw ? (
-          <>
-            <View style={styles.statsContainer}>
-              <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlVoltage')}</Text>
-                <Text style={[styles.statValue, { color: theme.textPrimary }]}>52.4 V</Text>
-              </View>
-              <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlCurrent')}</Text>
-                <Text style={[styles.statValue, { color: theme.textPrimary }]}>12.1 A</Text>
-              </View>
-              <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlSOC')}</Text>
-                <Text style={[styles.statValue, { color: theme.textPrimary }]}>84 %</Text>
-              </View>
-              <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{t('ctrlTemp')}</Text>
-                <Text style={[styles.statValue, { color: theme.textPrimary }]}>32 °C</Text>
-              </View>
-            </View>
-
-            <View style={styles.controlsSection}>
-              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{t('ctrlMainControls')}</Text>
-              
-              <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <View style={styles.controlInfo}>
-                  <MaterialCommunityIcons 
-                    name={isDischarging ? "lightning-bolt" : "lightning-bolt-outline"} 
-                    size={32} 
-                    color={isDischarging ? theme.success : theme.danger} 
-                  />
-                  <View style={styles.controlText}>
-                    <View style={styles.titleRow}>
-                      <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>{t('ctrlDischargeTitle')}</Text>
-                      <TouchableOpacity onPress={() => showInfo(
-                        t('ctrlDischargeTitle'), 
-                        "Controls the power going OUT to the rickshaw's motor. Disabling this acts as a secure anti-theft kill switch, completely cutting off the motor's power supply so the rickshaw cannot be driven."
-                      )}>
-                        <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
-                      </TouchableOpacity>
-                    </View>
-                    <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>
-                      {isDischarging ? t('ctrlDischargeOn') : t('ctrlDischargeOff')}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: isDischarging ? theme.danger : theme.success }]}
-                  onPress={() => setIsDischarging(!isDischarging)}
-                >
-                  <Text style={styles.actionButtonText}>
-                    {isDischarging ? t('ctrlBtnCut') : t('ctrlBtnRestore')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={[styles.controlCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <View style={styles.controlInfo}>
-                  <MaterialCommunityIcons 
-                    name={isCharging ? "power-plug" : "power-plug-off"} 
-                    size={32} 
-                    color={isCharging ? theme.primary : theme.textSecondary} 
-                  />
-                  <View style={styles.controlText}>
-                    <View style={styles.titleRow}>
-                      <Text style={[styles.controlTitle, { color: theme.textPrimary }]}>{t('ctrlChargeTitle')}</Text>
-                      <TouchableOpacity onPress={() => showInfo(
-                        t('ctrlChargeTitle'), 
-                        "Controls the power coming IN from a wall charger. Disable this to stop the battery from accepting electricity. Useful for preventing overcharging, extending battery lifespan, or for safety if a public charger seems faulty."
-                      )}>
-                        <MaterialCommunityIcons name="information" size={20} color={theme.primary} style={styles.infoIcon} />
-                      </TouchableOpacity>
-                    </View>
-                    <Text style={[styles.controlDesc, { color: theme.textSecondary }]}>
-                      {isCharging ? t('ctrlChargeOn') : t('ctrlChargeOff')}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: isCharging ? theme.warning : theme.primary }]}
-                  onPress={() => setIsCharging(!isCharging)}
-                >
-                  <Text style={styles.actionButtonText}>
-                    {isCharging ? t('ctrlBtnDisable') : t('ctrlBtnEnable')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </>
+          <DeviceSpecificControls 
+            deviceInfo={getDeviceTypeInfo(myRickshaw.name)}
+            theme={theme}
+            t={t}
+            showInfo={showInfo}
+            isDischarging={isDischarging}
+            setIsDischarging={setIsDischarging}
+            isCharging={isCharging}
+            setIsCharging={setIsCharging}
+          />
         ) : (
           <View style={styles.emptyContainer}>
             <MaterialCommunityIcons name="car-battery" size={80} color={theme.textSecondary} style={{ marginBottom: 20 }} />
