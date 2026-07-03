@@ -183,6 +183,33 @@ export default function ScannerScreen() {
                     <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>{t('auditEmpty')}</Text>
                   </>
                 )}
+                
+                {/* Hidden Developer Tools */}
+                <View style={{ marginTop: 60, marginBottom: 20, opacity: 0.2, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, marginBottom: 12, color: theme.textSecondary, letterSpacing: 1 }}>DEVELOPER TESTING</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <TouchableOpacity 
+                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
+                      onPress={() => connectToHistoryDevice({ id: 'test-audio', name: 'JBL Headphones' })}>
+                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test Audio</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
+                      onPress={() => connectToHistoryDevice({ id: 'test-watch', name: 'Garmin Watch' })}>
+                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test Watch</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
+                      onPress={() => connectToHistoryDevice({ id: 'test-tv', name: 'LG Smart TV' })}>
+                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test TV</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={{ padding: 6, margin: 4, borderWidth: 1, borderColor: theme.border, borderRadius: 4 }}
+                      onPress={() => connectToHistoryDevice({ id: 'test-bms', name: 'Daly BMS 48V' })}>
+                      <Text style={{ fontSize: 10, color: theme.textSecondary }}>Test BMS</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </ScrollView>
             ) : (
               <FlatList
