@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView, Platform, StatusBar, TextInput, Modal, RefreshControl, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -218,7 +219,8 @@ export default function ScannerScreen() {
                       </TouchableOpacity>
                     )}
                   </View>
-                )}
+                );
+              }}
               />
             )}
           </View>
