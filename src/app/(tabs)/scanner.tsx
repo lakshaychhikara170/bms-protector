@@ -117,11 +117,12 @@ export default function ScannerScreen() {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border, justifyContent: 'space-between' }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity onPress={() => setIsDevModalVisible(true)} activeOpacity={0.8}>
-              <MaterialCommunityIcons name="radar" size={28} color={theme.danger} />
-            </TouchableOpacity>
+            <MaterialCommunityIcons name="radar" size={28} color={theme.danger} />
             <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('auditHeader')}</Text>
           </View>
+          <TouchableOpacity onPress={() => setIsDevModalVisible(true)} style={{ padding: 4, opacity: 0.3 }}>
+            <MaterialCommunityIcons name="bug" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
